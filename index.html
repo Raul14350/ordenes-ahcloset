@@ -602,22 +602,7 @@ function sendOrder() {
   URL.revokeObjectURL(csvUrl);
 
   // WhatsApp notification
-  var msgWA = 'Nueva Orden A&H Closet' +
-    '
-Carpintero: ' + nombre +
-    '
-Tel: ' + (telefono || 'N/A') +
-    '
-Ref: ' + (ref || 'Sin referencia') +
-    '
-Material: ' + material +
-    '
-Piezas: ' + piezas.length +
-    '
-Notas: ' + notas +
-    '
-
-Archivo CSV descargado en mi telefono.';
+  var msgWA = 'Nueva Orden A&H Closet\nCarpintero: ' + nombre + '\nTel: ' + (telefono || 'N/A') + '\nRef: ' + (ref || 'Sin referencia') + '\nMaterial: ' + material + '\nPiezas: ' + piezas.length + '\nNotas: ' + notas + '\n\nArchivo CSV descargado en mi telefono.';
 
   setTimeout(function() {
     window.open('https://wa.me/17866900624?text=' + encodeURIComponent(msgWA), '_blank');
