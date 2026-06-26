@@ -577,27 +577,17 @@ function sendOrder() {
 
   // Build CSV
   var csv = '﻿';
-  csv += 'A&H Closet & Kitchen
-';
-  csv += 'Carpintero,' + nombre + '
-';
-  csv += 'Telefono,' + (telefono || 'N/A') + '
-';
-  csv += 'Referencia,' + (ref || 'Sin referencia') + '
-';
-  csv += 'Material,' + material + '
-
-';
-  csv += '#,Cantidad,Ancho,Alto,Notas
-';
+  csv += 'A&H Closet and Kitchen\r\n';
+  csv += 'Carpintero,' + nombre + '\r\n';
+  csv += 'Telefono,' + (telefono || 'N/A') + '\r\n';
+  csv += 'Referencia,' + (ref || 'Sin referencia') + '\r\n';
+  csv += 'Material,' + material + '\r\n\r\n';
+  csv += '#,Cantidad,Ancho,Alto,Notas\r\n';
   for (var i = 0; i < piezas.length; i++) {
     var p = piezas[i];
-    csv += p.num + ',' + p.cantidad + ',' + p.ancho + '",' + p.alto + '",' + (p.notas || '') + '
-';
+    csv += p.num + ',' + p.cantidad + ',' + p.ancho + '",' + p.alto + '",' + (p.notas || '') + '\r\n';
   }
-  csv += '
-Notas,' + notas + '
-';
+  csv += '\r\nNotas,' + notas + '\r\n';
 
   // Download CSV
   var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
