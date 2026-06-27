@@ -614,11 +614,11 @@ function sendOrder() {
     '<pre style="background:#f7f3ee;padding:12px;border-radius:6px;font-size:12px;">' + csv + '</pre>';
 
   // Send to Make webhook -> Resend
-  // Build tab-separated text for easy paste into Excel/system
-  var piezasStr = 'Cant\tAncho\tAlto\tNotas\n';
+  // Build pieces as HTML rows for email
+  var piezasStr = '<b>Cant &nbsp; Ancho &nbsp; Alto &nbsp; Notas</b><br>';
   for (var j = 0; j < piezas.length; j++) {
     var p = piezas[j];
-    piezasStr += p.cantidad + '\t' + p.ancho + '\t' + p.alto + '\t' + (p.notas || '') + '\n';
+    piezasStr += p.cantidad + ' &nbsp;&nbsp; ' + p.ancho + ' &nbsp;&nbsp; ' + p.alto + ' &nbsp;&nbsp; ' + (p.notas || '') + '<br>';
   }
 
   fetch('https://hook.us2.make.com/8rgtejk7t95nm6bcfmdxn63414r29u56', {
