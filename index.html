@@ -614,6 +614,13 @@ function sendOrder() {
     '<pre style="background:#f7f3ee;padding:12px;border-radius:6px;font-size:12px;">' + csv + '</pre>';
 
   // Send to Make webhook -> Resend
+  // Build flat pieces string for email
+  var piezasStr = '#|Cant|Ancho|Alto|Notas';
+  for (var j = 0; j < piezas.length; j++) {
+    var p = piezas[j];
+    piezasStr += ' // ' + p.num + '|' + p.cantidad + '|' + p.ancho + '"|' + p.alto + '"|' + (p.notas || '');
+  }
+
   fetch('https://hook.us2.make.com/8rgtejk7t95nm6bcfmdxn63414r29u56', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -623,7 +630,7 @@ function sendOrder() {
       referencia: ref || 'Sin referencia',
       material: material,
       notas: notas,
-      tabla: csv
+      piezas: piezasStr
     })
   }).then(function(r) {
     console.log('Webhook sent:', r.status);
