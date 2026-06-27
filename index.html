@@ -613,22 +613,22 @@ function sendOrder() {
     '<p><b>Notas:</b> ' + notas + '</p>' +
     '<pre style="background:#f7f3ee;padding:12px;border-radius:6px;font-size:12px;">' + csv + '</pre>';
 
-  fetch('https://api.resend.com/emails', {
+  // Send to Make webhook -> Resend
+  fetch('https://hook.us2.make.com/8rgtejk7t95nm6bcfmdxn63414r29u56', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer re_KyXAzxP4_' + 'L2E9BG16xELy7owi6hATHn5Q'
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      from: 'onboarding@resend.dev',
-      to: 'ahdoorscabinets@gmail.com',
-      subject: 'Nueva Orden — ' + nombre,
-      html: htmlBody
+      carpintero: nombre,
+      telefono: telefono || 'N/A',
+      referencia: ref || 'Sin referencia',
+      material: material,
+      notas: notas,
+      tabla: csv
     })
   }).then(function(r) {
-    console.log('Email sent:', r.status);
+    console.log('Webhook sent:', r.status);
   }).catch(function(e) {
-    console.log('Email error:', e);
+    console.log('Webhook error:', e);
   });
 
   setTimeout(function() {
