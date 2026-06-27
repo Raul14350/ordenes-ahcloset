@@ -633,7 +633,8 @@ function sendOrder() {
       referencia: ref || 'Sin referencia',
       material: material,
       notas: notas,
-      piezas: piezasStr
+      piezas: piezasStr,
+      foto: 'data:' + imageType + ';base64,' + imageBase64
     })
   }).then(function(r) {
     console.log('Webhook sent:', r.status);
