@@ -618,7 +618,7 @@ function sendOrder() {
   var piezasStr = '#|Cant|Ancho|Alto|Notas';
   for (var j = 0; j < piezas.length; j++) {
     var p = piezas[j];
-    piezasStr += ' // ' + p.num + '|' + p.cantidad + '|' + p.ancho + '"|' + p.alto + '"|' + (p.notas || '');
+    piezasStr += ' // ' + p.num + '|' + p.cantidad + '|' + p.ancho + ' in|' + p.alto + ' in|' + (p.notas || '');
   }
 
   fetch('https://hook.us2.make.com/8rgtejk7t95nm6bcfmdxn63414r29u56', {
