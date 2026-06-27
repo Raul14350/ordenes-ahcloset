@@ -614,15 +614,12 @@ function sendOrder() {
     '<pre style="background:#f7f3ee;padding:12px;border-radius:6px;font-size:12px;">' + csv + '</pre>';
 
   // Send to Make webhook -> Resend
-  // Build HTML table for email
-  var piezasHtml = '<table border=1 cellpadding=5 cellspacing=0 style=border-collapse:collapse;font-size:12px;><tr style=background:#3D2B1F;color:white><th>#</th><th>Cant</th><th>Ancho</th><th>Alto</th><th>Notas</th></tr>';
+  // Build tab-separated text for easy paste into Excel/system
+  var piezasStr = 'Cant\tAncho\tAlto\tNotas\n';
   for (var j = 0; j < piezas.length; j++) {
     var p = piezas[j];
-    var bg = j % 2 === 0 ? 'white' : '#f7f3ee';
-    piezasHtml += '<tr style=background:' + bg + '><td>' + p.num + '</td><td>' + p.cantidad + '</td><td>' + p.ancho + '</td><td>' + p.alto + '</td><td>' + (p.notas || '-') + '</td></tr>';
+    piezasStr += p.cantidad + '\t' + p.ancho + '\t' + p.alto + '\t' + (p.notas || '') + '\n';
   }
-  piezasHtml += '</table>';
-  var piezasStr = piezasHtml;
 
   fetch('https://hook.us2.make.com/8rgtejk7t95nm6bcfmdxn63414r29u56', {
     method: 'POST',
