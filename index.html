@@ -601,25 +601,17 @@ function sendOrder() {
   document.body.removeChild(a);
   URL.revokeObjectURL(csvUrl);
 
-  // WhatsApp notification
-  var msgWA = 'Nueva Orden A&H Closet\nCarpintero: ' + nombre + '\nTel: ' + (telefono || 'N/A') + '\nRef: ' + (ref || 'Sin referencia') + '\nMaterial: ' + material + '\nPiezas: ' + piezas.length + '\nNotas: ' + notas + '\n\nArchivo CSV descargado en mi telefono.';
 
-  // Send email via Resend
-  var htmlBody = '<h2 style="color:#3D2B1F;">Nueva Orden — A&H Closet & Kitchen</h2>' +
-    '<p><b>Carpintero:</b> ' + nombre + '<br>' +
-    '<b>Telefono:</b> ' + (telefono || 'N/A') + '<br>' +
-    '<b>Referencia:</b> ' + (ref || 'Sin referencia') + '<br>' +
-    '<b>Material:</b> ' + material + '</p>' +
-    '<p><b>Notas:</b> ' + notas + '</p>' +
-    '<pre style="background:#f7f3ee;padding:12px;border-radius:6px;font-size:12px;">' + csv + '</pre>';
 
   // Send to Make webhook -> Resend
-  // Build pieces as HTML rows for email
-  var piezasStr = '<b>Cant &nbsp; Ancho &nbsp; Alto &nbsp; Notas</b><br>';
+  // Build HTML table for email
+  var piezasStr = '<table border=1 cellpadding=4 cellspacing=0 style=border-collapse:collapse;font-size:12px;><tr style=background:#3D2B1F;color:white><th>Cant</th><th>Ancho</th><th>Alto</th><th>Notas</th></tr>';
   for (var j = 0; j < piezas.length; j++) {
     var p = piezas[j];
-    piezasStr += p.cantidad + ' &nbsp;&nbsp; ' + p.ancho + ' &nbsp;&nbsp; ' + p.alto + ' &nbsp;&nbsp; ' + (p.notas || '') + '<br>';
+    var bg = j % 2 === 0 ? 'white' : '#f7f3ee';
+    piezasStr += '<tr style=background:' + bg + '><td>' + p.cantidad + '</td><td>' + p.ancho + '</td><td>' + p.alto + '</td><td>' + (p.notas || '-') + '</td></tr>';
   }
+  piezasStr += '</table>';
 
   fetch('https://hook.us2.make.com/8rgtejk7t95nm6bcfmdxn63414r29u56', {
     method: 'POST',
@@ -639,9 +631,7 @@ function sendOrder() {
     console.log('Webhook error:', e);
   });
 
-  setTimeout(function() {
-    window.open('https://wa.me/17866900624?text=' + encodeURIComponent(msgWA), '_blank');
-  }, 800);
+
 
   // Show confirmation
   document.getElementById('card-datos').style.display = 'none';
