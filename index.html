@@ -604,19 +604,32 @@ function sendOrder() {
   // WhatsApp notification
   var msgWA = 'Nueva Orden A&H Closet\nCarpintero: ' + nombre + '\nTel: ' + (telefono || 'N/A') + '\nRef: ' + (ref || 'Sin referencia') + '\nMaterial: ' + material + '\nPiezas: ' + piezas.length + '\nNotas: ' + notas + '\n\nArchivo CSV descargado en mi telefono.';
 
-  // Send to Make webhook
-  fetch('https://hook.us2.make.com/8rgtejk7t95nm6bcfmdxn63414r29u56', {
+  // Send email via Resend
+  var htmlBody = '<h2 style="color:#3D2B1F;">Nueva Orden — A&H Closet & Kitchen</h2>' +
+    '<p><b>Carpintero:</b> ' + nombre + '<br>' +
+    '<b>Telefono:</b> ' + (telefono || 'N/A') + '<br>' +
+    '<b>Referencia:</b> ' + (ref || 'Sin referencia') + '<br>' +
+    '<b>Material:</b> ' + material + '</p>' +
+    '<p><b>Notas:</b> ' + notas + '</p>' +
+    '<pre style="background:#f7f3ee;padding:12px;border-radius:6px;font-size:12px;">' + csv + '</pre>';
+
+  fetch('https://api.resend.com/emails', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer re_KyXAzxP4_' + 'L2E9BG16xELy7owi6hATHn5Q'
+    },
     body: JSON.stringify({
-      carpintero: nombre,
-      telefono: telefono || 'N/A',
-      referencia: ref || 'Sin referencia',
-      material: material,
-      notas: notas,
-      tabla: csv
+      from: 'onboarding@resend.dev',
+      to: 'ahdoorscabinets@gmail.com',
+      subject: 'Nueva Orden — ' + nombre,
+      html: htmlBody
     })
-  }).catch(function(e) { console.log('Webhook error:', e); });
+  }).then(function(r) {
+    console.log('Email sent:', r.status);
+  }).catch(function(e) {
+    console.log('Email error:', e);
+  });
 
   setTimeout(function() {
     window.open('https://wa.me/17866900624?text=' + encodeURIComponent(msgWA), '_blank');
