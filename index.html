@@ -605,7 +605,7 @@ function sendOrder() {
 
   // Send to Make webhook -> Resend
   // Build HTML table for email
-  var piezasStr = '<table border=1 cellpadding=4 cellspacing=0 style=border-collapse:collapse;font-size:12px;><tr style=background:#3D2B1F;color:white><th>Cant</th><th>Ancho</th><th>Alto</th><th>Notas</th></tr>';
+  var piezasStr = '<table border=1 cellpadding=4 cellspacing=0 style=border-collapse:collapse;font-size:12px;><tr style=background:#3D2B1F;color:white><th>Alto</th><th>Ancho</th><th>Cant</th><th>Notas</th></tr>';
   for (var j = 0; j < piezas.length; j++) {
     var p = piezas[j];
     var bg = j % 2 === 0 ? 'white' : '#f7f3ee';
