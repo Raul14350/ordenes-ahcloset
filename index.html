@@ -609,7 +609,7 @@ function sendOrder() {
   for (var j = 0; j < piezas.length; j++) {
     var p = piezas[j];
     var bg = j % 2 === 0 ? 'white' : '#f7f3ee';
-    piezasStr += '<tr style=background:' + bg + '><td>' + p.cantidad + '</td><td>' + p.ancho + '</td><td>' + p.alto + '</td><td>' + (p.notas || '-') + '</td></tr>';
+    piezasStr += '<tr style=background:' + bg + '><td>' + p.alto + '</td><td>' + p.ancho + '</td><td>' + p.cantidad + '</td><td>' + (p.notas || '-') + '</td></tr>';
   }
   piezasStr += '</table>';
 
