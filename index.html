@@ -563,6 +563,46 @@ function toggleEdit() {
   area.style.display = area.style.display === 'none' ? 'block' : 'none';
 }
 
+// Quita comillas de pulgadas y cualquier caracter que rompa CSV/JSON
+// (Claude a veces copia el simbolo " tal cual aparece en la foto)
+function limpiarMedida(v) {
+  if (v === null || v === undefined) return '';
+  return String(v).replace(/["']/g, '').trim();
+}
+
+// La foto original del telefono puede pesar varios MB en base64 — eso es
+// lo que esta tumbando el fetch al webhook ("Failed to fetch") en datos
+// moviles. Generamos una version chica (max 900px, jpeg 50%) solo para
+// adjuntar al correo; la foto original de alta calidad ya se uso para
+// leer las medidas y no se toca.
+function comprimirFoto(base64, tipo) {
+  return new Promise(function(resolve) {
+    try {
+      var img = new Image();
+      img.onload = function() {
+        try {
+          var maxW = 900;
+          var scale = Math.min(1, maxW / img.width);
+          var w = Math.round(img.width * scale);
+          var h = Math.round(img.height * scale);
+          var canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.5));
+        } catch (err) {
+          console.log('Compress error:', err);
+          resolve(null);
+        }
+      };
+      img.onerror = function() { resolve(null); };
+      img.src = 'data:' + tipo + ';base64,' + base64;
+    } catch (err) {
+      resolve(null);
+    }
+  });
+}
+
 function sendOrder() {
   var btn = document.getElementById('btn-send');
   btn.disabled = true;
@@ -571,9 +611,20 @@ function sendOrder() {
   var nombre = document.getElementById('nombre').value.trim();
   var telefono = document.getElementById('telefono').value.trim();
   var ref = document.getElementById('num-orden').value.trim();
-  var piezas = currentData ? currentData.piezas || [] : [];
-  var material = currentData ? currentData.material || '' : '';
-  var notas = currentData ? currentData.notas_generales || '' : '';
+  var piezasRaw = currentData ? currentData.piezas || [] : [];
+  var material = limpiarMedida(currentData ? currentData.material || '' : '');
+  var notas = limpiarMedida(currentData ? currentData.notas_generales || '' : '');
+
+  // Piezas ya limpias de comillas — se usan para CSV, email y confirmacion
+  var piezas = piezasRaw.map(function(p) {
+    return {
+      num: p.num,
+      cantidad: p.cantidad,
+      ancho: limpiarMedida(p.ancho),
+      alto: limpiarMedida(p.alto),
+      notas: limpiarMedida(p.notas)
+    };
+  });
 
   // Build CSV
   var csv = '﻿';
@@ -613,31 +664,48 @@ function sendOrder() {
   }
   piezasStr += '</table>';
 
-  fetch('https://hook.us2.make.com/8rgtejk7t95nm6bcfmdxn63414r29u56', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      carpintero: nombre,
-      telefono: telefono || 'N/A',
-      referencia: ref || 'Sin referencia',
-      material: material,
-      notas: notas,
-      piezas: piezasStr,
-      foto: 'data:' + imageType + ';base64,' + imageBase64
-    })
-  }).then(function(r) {
-    console.log('Webhook sent:', r.status);
-  }).catch(function(e) {
-    console.log('Webhook error:', e);
+  function mostrarConfirmacion(avisoFalla) {
+    document.getElementById('card-datos').style.display = 'none';
+    document.getElementById('card-foto').style.display = 'none';
+    document.getElementById('card-result').style.display = 'none';
+    document.getElementById('card-confirm').style.display = 'block';
+    if (avisoFalla) {
+      var msg = document.createElement('p');
+      msg.style.color = '#B23A2E';
+      msg.style.marginTop = '10px';
+      msg.style.fontWeight = 'bold';
+      msg.textContent = 'El correo pudo NO haber llegado. Ya se descargo el CSV a tu telefono — envialo por WhatsApp a A&H como respaldo.';
+      document.getElementById('card-confirm').appendChild(msg);
+    }
+  }
+
+  function enviarAlWebhook(fotoParaEnviar) {
+    fetch('https://hook.us2.make.com/8rgtejk7t95nm6bcfmdxn63414r29u56', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        carpintero: nombre,
+        telefono: telefono || 'N/A',
+        referencia: ref || 'Sin referencia',
+        material: material,
+        notas: notas,
+        piezas: piezasStr,
+        foto: fotoParaEnviar || ''
+      })
+    }).then(function(r) {
+      console.log('Webhook sent:', r.status);
+      mostrarConfirmacion(!r.ok);
+    }).catch(function(e) {
+      console.log('Webhook error:', e);
+      mostrarConfirmacion(true);
+    });
+  }
+
+  // Comprime la foto antes de enviar (o sigue sin foto si falla) para
+  // no tumbar el fetch por tamano en datos moviles.
+  comprimirFoto(imageBase64, imageType).then(function(fotoChica) {
+    enviarAlWebhook(fotoChica);
   });
-
-
-
-  // Show confirmation
-  document.getElementById('card-datos').style.display = 'none';
-  document.getElementById('card-foto').style.display = 'none';
-  document.getElementById('card-result').style.display = 'none';
-  document.getElementById('card-confirm').style.display = 'block';
   document.getElementById('send-confirm').style.display = 'block';
 
   var summary = document.getElementById('confirm-summary');
