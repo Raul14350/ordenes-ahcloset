@@ -680,16 +680,9 @@ function sendOrder() {
   }
 
   function enviarAlWebhook(fotoParaEnviar) {
-    // OJO: Content-Type "application/json" obliga al navegador a mandar
-    // una verificacion previa (CORS preflight) antes del POST real. Si
-    // Make no responde bien a esa verificacion, el navegador NUNCA llega
-    // a mandar el dato real — eso explica los fallos intermitentes.
-    // Usamos "text/plain" (Make igual lee el JSON bien) y modo "no-cors"
-    // para que el POST real siempre salga, sin que el navegador lo frene.
     fetch('https://hook.us2.make.com/8rgtejk7t95nm6bcfmdxn63414r29u56', {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         carpintero: nombre,
         telefono: telefono || 'N/A',
@@ -699,15 +692,11 @@ function sendOrder() {
         piezas: piezasStr,
         foto: fotoParaEnviar || ''
       })
-    }).then(function() {
-      // En modo no-cors no podemos leer el status real de Make, pero si
-      // llegamos aqui es porque el POST SI salio del telefono.
-      console.log('Webhook request enviado (no-cors, sin status legible)');
-      mostrarConfirmacion(false);
+    }).then(function(r) {
+      console.log('Webhook sent:', r.status);
+      mostrarConfirmacion(!r.ok);
     }).catch(function(e) {
-      // Esto solo pasa si el telefono esta realmente sin conexion o hay
-      // un fallo real de red, no por CORS.
-      console.log('Webhook error real de red:', e);
+      console.log('Webhook error:', e);
       mostrarConfirmacion(true);
     });
   }
